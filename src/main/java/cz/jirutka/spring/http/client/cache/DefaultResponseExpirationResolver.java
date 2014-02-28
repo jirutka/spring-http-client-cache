@@ -91,6 +91,9 @@ public class DefaultResponseExpirationResolver implements ResponseExpirationReso
     long parseAgeHeader(HttpHeaders headers) {
         long result = 0;
 
+        if (!headers.containsKey("Age")) {
+            return result;
+        }
         for (String value : headers.get("Age")) {
             long age = toLong(value, MAX_AGE);
             if (age < 0) age = MAX_AGE;

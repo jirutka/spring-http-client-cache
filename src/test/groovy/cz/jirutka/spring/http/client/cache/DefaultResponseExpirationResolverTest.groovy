@@ -42,6 +42,7 @@ class DefaultResponseExpirationResolverTest extends Specification {
             values    | expected
             [60]      | 60
             [0]       | 0
+            []        | 0
             [-10]     | MAX_AGE
             [5,20,10] | 20
             ['inv']   | MAX_AGE
