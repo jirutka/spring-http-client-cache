@@ -38,6 +38,17 @@ public class SoftReferenceSynchronizedLruCache extends SynchronizedLruCache {
 
 
     @Override
+    public synchronized ValueWrapper get(Object key) {
+        ValueWrapper wrapped = super.get(key);
+
+        if (wrapped != null && wrapped.get() == null) {
+            // remove entry from cache if it's not valid, perhaps removed by GC
+            evict(key);
+        }
+        return wrapped;
+    }
+
+    @Override
     protected ValueWrapper createEntry(Object value) {
         return new SoftReferenceWrapper(value);
     }
