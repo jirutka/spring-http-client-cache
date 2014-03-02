@@ -79,6 +79,8 @@ public class SynchronizedLruCache implements Cache {
     }
 
     public synchronized void put(Object key, Object value) {
+        Assert.notNull(value, "value must not be null");
+
         store.put(key, createEntry(value));
     }
 

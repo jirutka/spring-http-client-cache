@@ -54,6 +54,13 @@ abstract class BaseLruCacheTest extends Specification {
             cache.get(key).get() == value
     }
 
+    def 'put: does not accept null value'() {
+        when:
+            cache.put('wrong', null)
+        then:
+            thrown(IllegalArgumentException)
+    }
+
     def 'evict: should remove existing entry'() {
         setup:
             cache.put('dead', 'wolf')
