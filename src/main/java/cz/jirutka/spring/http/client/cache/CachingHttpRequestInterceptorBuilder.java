@@ -16,6 +16,7 @@
 package cz.jirutka.spring.http.client.cache;
 
 import cz.jirutka.spring.http.client.cache.internal.HttpResponseCache;
+import cz.jirutka.spring.http.client.cache.internal.HttpResponseCacheImpl;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.cache.Cache;
@@ -80,7 +81,7 @@ public final class CachingHttpRequestInterceptorBuilder {
         }
         Assert.notNull(cache, "You must specify cache backend, or use inMemoryCache ");
 
-        HttpResponseCache responseCache = new HttpResponseCache(cache, sharedCache, maxResponseSize);
+        HttpResponseCache responseCache = new HttpResponseCacheImpl(cache, sharedCache, maxResponseSize);
 
         return new CachingHttpRequestInterceptor(responseCache, cachingPolicy, new DefaultCachedEntrySuitabilityChecker());
     }

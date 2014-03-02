@@ -17,6 +17,7 @@ package cz.jirutka.spring.http.client.cache;
 
 import cz.jirutka.spring.http.client.cache.internal.CacheEntry;
 import cz.jirutka.spring.http.client.cache.internal.HttpResponseCache;
+import cz.jirutka.spring.http.client.cache.internal.HttpResponseCacheImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,7 @@ public class CachingHttpRequestInterceptor implements ClientHttpRequestIntercept
 
 
     public CachingHttpRequestInterceptor(Cache cache, boolean sharedCache, int maxResponseSize) {
-        this.cache = new HttpResponseCache(cache, sharedCache, maxResponseSize);
+        this.cache = new HttpResponseCacheImpl(cache, sharedCache, maxResponseSize);
         this.cachingPolicy = new DefaultCachingPolicy(sharedCache, maxResponseSize);
         this.cachedChecker = new DefaultCachedEntrySuitabilityChecker();
     }

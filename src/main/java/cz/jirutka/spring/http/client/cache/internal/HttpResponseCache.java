@@ -15,56 +15,17 @@
  */
 package cz.jirutka.spring.http.client.cache.internal;
 
-import cz.jirutka.spring.http.client.cache.CacheKeyGenerator;
-import cz.jirutka.spring.http.client.cache.DefaultResponseExpirationResolver;
-import cz.jirutka.spring.http.client.cache.ResponseExpirationResolver;
-import cz.jirutka.spring.http.client.cache.SimpleCacheKeyGenerator;
-import cz.jirutka.spring.http.client.cache.internal.SizeLimitedResponseReader.ResponseSizeLimitExceededException;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.Cache;
-import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.util.Date;
 
-@Slf4j
-public class HttpResponseCache {
+public interface HttpResponseCache {
 
-    private final Cache cache;
+    void clear();
 
-    private final CacheKeyGenerator keyGenerator;
-
-    @Getter @Setter
-    private ResponseExpirationResolver expirationResolver;
-
-    @Getter @Setter
-    private SizeLimitedResponseReader responseReader;
-
-
-    public HttpResponseCache(Cache cache, boolean sharedCache, int maxResponseSize) {
-        this(cache, sharedCache, maxResponseSize, new SimpleCacheKeyGenerator());
-    }
-
-    public HttpResponseCache(Cache cache, boolean sharedCache, int maxResponseSize, CacheKeyGenerator keyGenerator) {
-        this.cache = cache;
-        this.keyGenerator = keyGenerator;
-        this.expirationResolver = new DefaultResponseExpirationResolver(sharedCache);
-        this.responseReader = new SizeLimitedResponseReader(maxResponseSize);
-    }
-
-
-    public void clear() {
-        cache.clear();
-    }
-
-    public void evict(HttpRequest request) {
-        cache.evict(toKey(request));
-    }
+    void evict(HttpRequest request);
 
     /**
      * Returns a cached response for the given request.
@@ -73,40 +34,16 @@ public class HttpResponseCache {
      * @return A cached response for the given request, or {@code null} if
      *         this cache contains no entry for the request.
      */
-    public CacheEntry getCacheEntry(HttpRequest request) {
-        ValueWrapper wrapper = cache.get(toKey(request));
-
-        return wrapper != null ? (CacheEntry) wrapper.get() : null;
-    }
+    CacheEntry getCacheEntry(HttpRequest request);
 
     /**
-     * Store {@link ClientHttpResponse}, if possible, and return it.
+     * Store {@link org.springframework.http.client.ClientHttpResponse}, if possible, and return it.
      *
      * @param request The request with which the given response is to be associated.
      * @param response The response object to be cached.
      * @param requestSent When the request was send.
      * @param responseReceived When the response was received.
      */
-    public ClientHttpResponse cacheAndReturnResponse(HttpRequest request, ClientHttpResponse response, Date requestSent, Date responseReceived) throws IOException {
-        try {
-            InMemoryClientHttpResponse storedResponse = responseReader.readResponseUntilLimit(response);
-
-            Date initialDate = expirationResolver.resolveInitialDate(response, requestSent, responseReceived);
-            Date expirationDate = expirationResolver.resolveExpirationDate(response, initialDate);
-
-            cache.put(toKey(request), new CacheEntry(storedResponse, initialDate, expirationDate));
-
-            return storedResponse;
-
-        } catch (ResponseSizeLimitExceededException ex) {
-            log.info("[{} {}] {}", request.getMethod(), request.getURI(), "actual content length exceeded the limit");
-            return ex.getResponse();
-        }
-    }
-
-
-    private String toKey(HttpRequest request) {
-        Assert.notNull(request, "request must not be null");
-        return keyGenerator.createKey(request);
-    }
+    ClientHttpResponse cacheAndReturnResponse(
+            HttpRequest request, ClientHttpResponse response, Date requestSent, Date responseReceived) throws IOException;
 }
