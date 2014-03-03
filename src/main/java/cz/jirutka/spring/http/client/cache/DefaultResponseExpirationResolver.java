@@ -46,13 +46,13 @@ public class DefaultResponseExpirationResolver implements ResponseExpirationReso
 
 
     public Date resolveExpirationDate(ClientHttpResponse response, Date correctedInitialDate) {
-        long maxAgeIn = parseMaxAgeHeader(response.getHeaders()) * 1000L; //ms
+        long maxAge = parseMaxAgeHeader(response.getHeaders()) * 1000L; //ms
 
-        return new Date(correctedInitialDate.getTime() + maxAgeIn);
+        return new Date(correctedInitialDate.getTime() + maxAge);
     }
 
     public Date resolveInitialDate(ClientHttpResponse response, Date requestDate, Date responseDate) {
-        long age = correctedInitialAge(response, responseDate, requestDate) * 1000L; //ms
+        long age = correctedInitialAge(response, requestDate, responseDate) * 1000L; //ms
 
         return new Date(responseDate.getTime() + age);
     }

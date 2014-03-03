@@ -18,7 +18,6 @@ package cz.jirutka.spring.http.client.cache
 import cz.jirutka.spring.http.client.cache.test.AbbreviatedTimeCategory
 import cz.jirutka.spring.http.client.cache.test.HttpHeadersHelper
 import org.springframework.http.HttpHeaders
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.mop.Use
@@ -72,15 +71,32 @@ class DefaultResponseExpirationResolverTest extends Specification {
             0        | now -60.sec  | now          | now -10.sec || 70
     }
 
-    @Ignore('not implemented yet')
     def 'resolve corrected initial date'() {
-        expect:
-            false //TODO
+        setup:
+            def spiedResolver = Spy(DefaultResponseExpirationResolver)
+            def reqDate = now -2.sec
+            def respDate = now
+            def correctedAge = 60
+        when:
+            def returned = spiedResolver.resolveInitialDate(response, reqDate, respDate)
+        then:
+            1 * spiedResolver.correctedInitialAge(response, reqDate, respDate) >> correctedAge
+        and:
+            returned == respDate + correctedAge.sec
     }
 
-    @Ignore('not implemented yet')
     def 'resolve expiration date'() {
+        given:
+            def resolver = new DefaultResponseExpirationResolver(sharedCache)
+            def initDate = now - 5.sec
+        and:
+            responseHeaders = ['Cache-Control': cacheControl]
         expect:
-            false //TODO
+            resolver.resolveExpirationDate(response, initDate) == initDate + maxAge.sec
+        where:
+            cacheControl             | sharedCache | maxAge
+            'max-age=60,s-maxage=30' | false       | 60
+            'max-age=60,s-maxage=30' | true        | 30
+            'max-age=60'             | true        | 60
     }
 }
