@@ -88,7 +88,7 @@ class SizeLimitedHttpResponseReaderTest extends Specification {
 
         where:
             bodyLength | limit | overlap
-            280        | 255   | 24
+            280        | 256   | 24
             280        | 130   | 24
             170        | 160   | 0
     }

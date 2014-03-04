@@ -91,7 +91,7 @@ public class SizeLimitedHttpResponseReader implements HttpResponseReader {
             out.write(buffer, 0, bytesRead);
             bytesTotal += bytesRead;
 
-            if (bytesTotal > maxBodySize) {
+            if (bytesTotal > maxBodySize -1) {
                 throw new ResponseSizeLimitExceededException( createCombinedResponse(response, out, bodyStream) );
             }
         }
