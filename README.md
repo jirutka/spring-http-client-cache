@@ -23,7 +23,7 @@ Released versions are available in The Central Repository. Just add this artifac
 <dependency>
     <groupId>cz.jirutka.spring</groupId>
     <artifactId>spring-http-client-cache</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0.M1</version>
 </dependency>
 ```
 
