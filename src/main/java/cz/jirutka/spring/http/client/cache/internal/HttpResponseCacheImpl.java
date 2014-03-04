@@ -19,7 +19,7 @@ import cz.jirutka.spring.http.client.cache.CacheKeyGenerator;
 import cz.jirutka.spring.http.client.cache.DefaultResponseExpirationResolver;
 import cz.jirutka.spring.http.client.cache.ResponseExpirationResolver;
 import cz.jirutka.spring.http.client.cache.SimpleCacheKeyGenerator;
-import cz.jirutka.spring.http.client.cache.internal.SizeLimitedResponseReader.ResponseSizeLimitExceededException;
+import cz.jirutka.spring.http.client.cache.internal.SizeLimitedHttpResponseReader.ResponseSizeLimitExceededException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class HttpResponseCacheImpl implements HttpResponseCache {
     private ResponseExpirationResolver expirationResolver;
 
     @Getter @Setter
-    private SizeLimitedResponseReader responseReader;
+    private HttpResponseReader responseReader;
 
 
     public HttpResponseCacheImpl(Cache cache, boolean sharedCache, int maxResponseSize) {
@@ -54,7 +54,7 @@ public class HttpResponseCacheImpl implements HttpResponseCache {
         this.cache = cache;
         this.keyGenerator = keyGenerator;
         this.expirationResolver = new DefaultResponseExpirationResolver(sharedCache);
-        this.responseReader = new SizeLimitedResponseReader(maxResponseSize);
+        this.responseReader = new SizeLimitedHttpResponseReader(maxResponseSize);
     }
 
 
@@ -72,16 +72,18 @@ public class HttpResponseCacheImpl implements HttpResponseCache {
         return wrapper != null ? (CacheEntry) wrapper.get() : null;
     }
 
-    public ClientHttpResponse cacheAndReturnResponse(HttpRequest request, ClientHttpResponse response, Date requestSent, Date responseReceived) throws IOException {
+    public ClientHttpResponse cacheAndReturnResponse(
+            HttpRequest request, ClientHttpResponse response, Date requestSent, Date responseReceived) throws IOException {
+
         try {
-            InMemoryClientHttpResponse storedResponse = responseReader.readResponseUntilLimit(response);
+            InMemoryClientHttpResponse fetchedResp = responseReader.readResponse(response);
 
-            Date initialDate = expirationResolver.resolveInitialDate(response, requestSent, responseReceived);
-            Date expirationDate = expirationResolver.resolveExpirationDate(response, initialDate);
+            Date initialDate = expirationResolver.resolveInitialDate(fetchedResp, requestSent, responseReceived);
+            Date expirationDate = expirationResolver.resolveExpirationDate(fetchedResp, initialDate);
 
-            cache.put(toKey(request), new CacheEntry(storedResponse, initialDate, expirationDate));
+            cache.put(toKey(request), new CacheEntry(fetchedResp, initialDate, expirationDate));
 
-            return storedResponse;
+            return fetchedResp;
 
         } catch (ResponseSizeLimitExceededException ex) {
             log.info("[{} {}] {}", request.getMethod(), request.getURI(), "actual content length exceeded the limit");

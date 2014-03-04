@@ -33,8 +33,11 @@ class HttpHeadersHelper {
      */
     public static final DATE_FORMAT_RFC1123 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 
+    public static final EMPTY_BODY = new byte[0]
+    public static final SOME_BODY = 'allons-y!'.bytes
+
     HttpRequest request = buildRequest()
-    ClientHttpResponse response
+    ClientHttpResponse response = buildResponse()
 
     Date now = new Date()
 
@@ -60,7 +63,7 @@ class HttpHeadersHelper {
     }
 
     ClientHttpResponse buildResponse(kwargs = [:]) {
-        kwargs = [body: 'allons-y!', status: 200, Date: new Date(), 'Content-Length': 9] << kwargs  // default values
+        kwargs = [body: SOME_BODY, status: 200, Date: new Date(), 'Content-Length': 9] << kwargs  // default values
 
         def body = (kwargs['body'] as String).bytes
         def status = HttpStatus.valueOf(kwargs['status'] as int)

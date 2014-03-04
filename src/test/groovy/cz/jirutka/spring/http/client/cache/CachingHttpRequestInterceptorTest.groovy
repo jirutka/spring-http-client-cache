@@ -20,32 +20,25 @@ import cz.jirutka.spring.http.client.cache.internal.HttpResponseCache
 import cz.jirutka.spring.http.client.cache.internal.HttpResponseCacheImpl
 import cz.jirutka.spring.http.client.cache.internal.InMemoryClientHttpResponse
 import cz.jirutka.spring.http.client.cache.test.AbbreviatedTimeCategory
+import cz.jirutka.spring.http.client.cache.test.HttpHeadersHelper
 import org.springframework.cache.Cache
 import org.springframework.http.HttpHeaders
 import org.springframework.http.client.ClientHttpRequestExecution
-import org.springframework.mock.http.client.MockClientHttpRequest
-import org.springframework.mock.http.client.MockClientHttpResponse
 import spock.lang.Specification
 import spock.util.mop.Use
 
-import static org.springframework.http.HttpMethod.GET
 import static org.springframework.http.HttpStatus.OK
 
+@Mixin(HttpHeadersHelper)
 @Use(AbbreviatedTimeCategory)
 class CachingHttpRequestInterceptorTest extends Specification {
-
-    static final EMPTY_BODY = new byte[0]
-    static final SOME_BODY = 'allons-y!'.bytes
 
     def cache = Mock(HttpResponseCache)
     def cachingPolicy = Mock(CachingPolicy)
     def suitabilityChecker = Mock(CachedEntrySuitabilityChecker)
     def execution = Mock(ClientHttpRequestExecution)
 
-    def now = new Date()
     def interceptor = new CachingHttpRequestInterceptor(cache, cachingPolicy, suitabilityChecker)
-    def request = new MockClientHttpRequest(GET, new URI('http://example.org'))
-    def response = new MockClientHttpResponse(EMPTY_BODY, OK)
     def cacheEntry = new CacheEntry(new InMemoryClientHttpResponse(SOME_BODY, OK, new HttpHeaders()), now -1.min, now +2.min)
 
 
