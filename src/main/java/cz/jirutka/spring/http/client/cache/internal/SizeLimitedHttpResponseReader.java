@@ -23,30 +23,59 @@ import org.springframework.util.Assert;
 
 import java.io.*;
 
+/**
+ * HttpResponseReader implementation that reads a response until the specified
+ * size limit.
+ */
 @Immutable
-public class SizeLimitedResponseReader {
+public class SizeLimitedHttpResponseReader implements HttpResponseReader {
 
     public static final int DEFAULT_BUFFER_SIZE = 2048;
     private static final double INITIAL_CAPACITY_FACTOR = 0.3;
 
-    private final int bodySizeLimit;
+    private final int maxBodySize;
     private final int bufferSize;
 
-
-    public SizeLimitedResponseReader(int bodySizeLimit) {
-        this(bodySizeLimit, DEFAULT_BUFFER_SIZE);
+    /**
+     * Construct with a {@link #DEFAULT_BUFFER_SIZE default buffer size}.
+     *
+     * @param maxBodySize The maximal size to read in bytes. It must be
+     *                    greater then zero and should be multiple of the
+     *                    {@link #DEFAULT_BUFFER_SIZE}.
+     */
+    public SizeLimitedHttpResponseReader(int maxBodySize) {
+        this(maxBodySize, DEFAULT_BUFFER_SIZE);
     }
 
-    public SizeLimitedResponseReader(int bodySizeLimit, int bufferSize) {
-        Assert.isTrue(bodySizeLimit > 0, "bytesLimit must be greater then zero");
-        Assert.isTrue(bodySizeLimit > 0, "bufferSize must be greater then zero");
+    /**
+     * @param maxBodySize The maximal size to read in bytes. It must be
+     *                    greater then zero and should be multiple of the
+     *                    {@code bufferSize}.
+     * @param bufferSize The buffer size in bytes. It must be greater then zero.
+     */
+    public SizeLimitedHttpResponseReader(int maxBodySize, int bufferSize) {
+        Assert.isTrue(maxBodySize > 0, "bytesLimit must be greater then zero");
+        Assert.isTrue(maxBodySize > 0, "bufferSize must be greater then zero");
 
-        this.bodySizeLimit = bodySizeLimit;
+        this.maxBodySize = maxBodySize;
         this.bufferSize = bufferSize;
     }
 
 
-    public InMemoryClientHttpResponse readResponseUntilLimit(ClientHttpResponse response)
+    /**
+     * Reads the original {@link ClientHttpResponse} to memory, if possible,
+     * and returns a serializable copy. If the response's body size exceeds the
+     * specified {@code maxBodySize} limit, then it throws
+     * {@link ResponseSizeLimitExceededException} with a reconstructed response
+     * that combines an already read bytes in memory and the original response.
+     *
+     * @param response The original response to read.
+     * @return An in-memory copy of the original response.
+     * @throws ResponseSizeLimitExceededException When the response's body size
+     *         exceeds the specified {@code maxBodySize} limit.
+     * @throws IOException
+     */
+    public InMemoryClientHttpResponse readResponse(ClientHttpResponse response)
             throws ResponseSizeLimitExceededException, IOException {
 
         Assert.notNull(response, "response must not be null");
@@ -62,7 +91,7 @@ public class SizeLimitedResponseReader {
             out.write(buffer, 0, bytesRead);
             bytesTotal += bytesRead;
 
-            if (bytesTotal > bodySizeLimit) {
+            if (bytesTotal > maxBodySize) {
                 throw new ResponseSizeLimitExceededException( createCombinedResponse(response, out, bodyStream) );
             }
         }
@@ -73,7 +102,7 @@ public class SizeLimitedResponseReader {
 
 
     private int initialCapacity() {
-        return new Double(bodySizeLimit * INITIAL_CAPACITY_FACTOR).intValue();
+        return new Double(maxBodySize * INITIAL_CAPACITY_FACTOR).intValue();
     }
 
     private CombinedClientHttpResponse createCombinedResponse(
@@ -96,7 +125,7 @@ public class SizeLimitedResponseReader {
 
     //////// Inner class ////////
 
-    public static class ResponseSizeLimitExceededException extends Exception {
+    public static class ResponseSizeLimitExceededException extends IOException {
 
         private final ClientHttpResponse response;
 
@@ -104,6 +133,9 @@ public class SizeLimitedResponseReader {
             this.response = response;
         }
 
+        /**
+         * Returns a reconstructed response that can be read as usual.
+         */
         public ClientHttpResponse getResponse() {
             return response;
         }

@@ -15,14 +15,14 @@
  */
 package cz.jirutka.spring.http.client.cache.internal
 
-import cz.jirutka.spring.http.client.cache.internal.SizeLimitedResponseReader.ResponseSizeLimitExceededException
+import cz.jirutka.spring.http.client.cache.internal.SizeLimitedHttpResponseReader.ResponseSizeLimitExceededException
 import org.springframework.http.HttpStatus
 import org.springframework.http.client.ClientHttpResponse
 import spock.lang.Specification
 
 import static org.springframework.util.FileCopyUtils.copyToByteArray
 
-class SizeLimitedResponseReaderTest extends Specification {
+class SizeLimitedHttpResponseReaderTest extends Specification {
 
     static bufferSize = 128
 
@@ -37,12 +37,12 @@ class SizeLimitedResponseReaderTest extends Specification {
         setup:
             def expectedBody = generateBodyOfLength(bodyLength)
             def bodyStream = new ByteArrayInputStream(expectedBody)
-            def reader = new SizeLimitedResponseReader(limit, bufferSize)
+            def reader = new SizeLimitedHttpResponseReader(limit, bufferSize)
         and:
             response.body >> bodyStream
 
         when:
-            def readResponse = reader.readResponseUntilLimit(response)
+            def readResponse = reader.readResponse(response)
         then: 'body stream was completely read'
             readResponse instanceof InMemoryClientHttpResponse
         and:
@@ -65,12 +65,12 @@ class SizeLimitedResponseReaderTest extends Specification {
         setup:
             def expectedBody = generateBodyOfLength(bodyLength)
             def bodyStream = new ByteArrayInputStream(expectedBody)
-            def reader = new SizeLimitedResponseReader(limit, bufferSize)
+            def reader = new SizeLimitedHttpResponseReader(limit, bufferSize)
         and:
             response.body >> bodyStream
 
         when:
-            reader.readResponseUntilLimit(response)
+            reader.readResponse(response)
         then:
             def ex = thrown(ResponseSizeLimitExceededException)
             ex.response instanceof CombinedClientHttpResponse
@@ -87,10 +87,10 @@ class SizeLimitedResponseReaderTest extends Specification {
             bodyStream.available() == 0
 
         where:
-            bodyLength | limit          | overlap
-            280        | 255            | 24
-            280        | 130            | 24
-            170        | 160            | 0
+            bodyLength | limit | overlap
+            280        | 255   | 24
+            280        | 130   | 24
+            170        | 160   | 0
     }
 
 
