@@ -33,7 +33,7 @@ abstract class BaseLruCacheTest extends Specification {
         when:
             createCache(capacity)
         then:
-            thrown(IllegalArgumentException)
+            thrown IllegalArgumentException
         where:
             capacity << [0, -6]
     }
@@ -58,7 +58,7 @@ abstract class BaseLruCacheTest extends Specification {
         when:
             cache.put('wrong', null)
         then:
-            thrown(IllegalArgumentException)
+            thrown IllegalArgumentException
     }
 
     def 'evict: should remove existing entry'() {

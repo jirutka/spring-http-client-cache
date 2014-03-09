@@ -50,14 +50,17 @@ public class CachingHttpRequestInterceptor implements ClientHttpRequestIntercept
         this.cachedChecker = new DefaultCachedEntrySuitabilityChecker();
     }
 
-    public CachingHttpRequestInterceptor(HttpResponseCache cache, CachingPolicy cachingPolicy, CachedEntrySuitabilityChecker cachedChecker) {
+    public CachingHttpRequestInterceptor(
+            HttpResponseCache cache, CachingPolicy cachingPolicy, CachedEntrySuitabilityChecker cachedChecker) {
+
         this.cache = cache;
         this.cachingPolicy = cachingPolicy;
         this.cachedChecker = cachedChecker;
     }
 
 
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+    public ClientHttpResponse intercept(
+            HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
 
         if (!cachingPolicy.isServableFromCache(request)) {
             log("not servable from cache", request);
@@ -76,7 +79,9 @@ public class CachingHttpRequestInterceptor implements ClientHttpRequestIntercept
     }
 
 
-    protected ClientHttpResponse execute(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+    protected ClientHttpResponse execute(
+            HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+
         final Date requestDate = currentDate();
 
         ClientHttpResponse response = execution.execute(request, body);

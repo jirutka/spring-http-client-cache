@@ -48,7 +48,9 @@ public class SynchronizedLruCache implements Cache {
      * @param capacity The maximal capacity.
      */
     public SynchronizedLruCache(String name, int capacity) {
-        this(name, capacity, (DEFAULT_INITIAL_CAPACITY > capacity ? capacity : DEFAULT_INITIAL_CAPACITY), DEFAULT_LOAD_FACTOR);
+        this(name, capacity,
+             DEFAULT_INITIAL_CAPACITY > capacity ? capacity : DEFAULT_INITIAL_CAPACITY,
+             DEFAULT_LOAD_FACTOR);
     }
 
     public SynchronizedLruCache(String name, int capacity, int initialCapacity, float loadFactory) {
@@ -70,7 +72,7 @@ public class SynchronizedLruCache implements Cache {
         return name;
     }
 
-    public LinkedHashMap getNativeCache() {
+    public Map getNativeCache() {
         return store;
     }
 
