@@ -1,5 +1,6 @@
-Spring HTTP Client Cache [![Build Status](https://travis-ci.org/jirutka/spring-http-client-cache.png)](https://travis-ci.org/jirutka/spring-http-client-cache) [![Coverage Status](https://coveralls.io/repos/jirutka/spring-http-client-cache/badge.png)](https://coveralls.io/r/jirutka/spring-http-client-cache)
+Spring HTTP Client Cache
 ========================
+[![Build Status](https://travis-ci.org/jirutka/spring-http-client-cache.svg)](https://travis-ci.org/jirutka/spring-http-client-cache) [![Coverage Status](http://img.shields.io/coveralls/jirutka/spring-http-client-cache.svg)](https://coveralls.io/r/jirutka/spring-http-client-cache) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/cz.jirutka.spring/spring-http-client-cache/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cz.jirutka.spring/spring-http-client-cache)
 
 The aim of this project is to provide a _lightweight_ client HTTP cache for the [Spring Framework](http://projects.spring.io/spring-framework/), specifically [RestTemplate](http://docs.spring.io/spring/docs/3.2.x/javadoc-api/org/springframework/web/client/RestTemplate.html). It’s implemented purely on top of Spring’s interfaces and doesn’t use any “heavy” caching library.
 
